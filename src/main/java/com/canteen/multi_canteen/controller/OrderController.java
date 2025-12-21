@@ -18,12 +18,12 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    // ✅ Constructor injection (recommended)
+    //  Constructor injection (recommended)
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
 
-    // ✅ POST /api/orders  (student places order)
+    //  POST /api/orders  (student places order)
     @PostMapping
     public Map<String, Object> placeOrder(@RequestBody CreateOrderRequest request) {
 
@@ -38,7 +38,7 @@ public class OrderController {
         return response;
     }
 
-    // ✅ GET /api/orders/my?studentId=1  (student's orders - compact)
+    //  GET /api/orders/my?studentId=1  (student's orders - compact)
     @GetMapping("/my")
     public List<Map<String, Object>> getMyOrders(@RequestParam Long studentId) {
 
@@ -58,7 +58,7 @@ public class OrderController {
                 .collect(Collectors.toList());
     }
 
-    // ✅ GET /api/orders/college/{collegeId}  (admin view - compact)
+    //  GET /api/orders/college/{collegeId}  (admin view - compact)
     @GetMapping("/college/{collegeId}")
     public List<Map<String, Object>> getOrdersForCollege(@PathVariable Long collegeId) {
 
@@ -78,7 +78,7 @@ public class OrderController {
                 .collect(Collectors.toList());
     }
 
-    // ✅ PATCH /api/orders/{orderId}/status  (admin updates status)
+    //  PATCH /api/orders/{orderId}/status  (admin updates status)
     @PatchMapping("/{orderId}/status")
     public Map<String, Object> updateOrderStatus(@PathVariable Long orderId,
                                                  @RequestBody UpdateOrderStatusRequest request) {
