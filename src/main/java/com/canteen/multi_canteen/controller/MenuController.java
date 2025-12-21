@@ -16,18 +16,18 @@ public class MenuController {
 
     private final MenuService menuService;
 
-    // ✅ Constructor injection (prevents null issues)
+    //  Constructor injection (prevents null issues)
     public MenuController(MenuService menuService) {
         this.menuService = menuService;
     }
 
-    // ✅ GET /api/menu/{collegeId}
+    //  GET /api/menu/{collegeId}
     @GetMapping("/{collegeId}")
     public List<MenuItem> getMenuByCollege(@PathVariable Long collegeId) {
         return menuService.getMenuByCollegeId(collegeId);
     }
 
-    // ✅ POST /api/menu/{collegeId} (Create)
+    //  POST /api/menu/{collegeId} (Create)
     @PostMapping("/{collegeId}")
     public ResponseEntity<?> createMenuItem(@PathVariable Long collegeId,
                                             @RequestBody MenuItem menuItem) {
@@ -41,7 +41,7 @@ public class MenuController {
         }
     }
 
-    // ✅ PUT /api/menu/{itemId} (Update)
+    //  PUT /api/menu/{itemId} (Update)
     @PutMapping("/{itemId}")
     public ResponseEntity<?> updateMenuItem(@PathVariable Long itemId,
                                             @RequestBody MenuItem menuItem) {
@@ -55,7 +55,7 @@ public class MenuController {
         }
     }
 
-    // ✅ DELETE /api/menu/{itemId} (Delete)
+    //  DELETE /api/menu/{itemId} (Delete)
     @DeleteMapping("/{itemId}")
     public ResponseEntity<?> deleteMenuItem(@PathVariable Long itemId) {
         try {
