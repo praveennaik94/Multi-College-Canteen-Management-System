@@ -29,7 +29,7 @@ public class StudentController {
         this.orderItemRepository = orderItemRepository;
     }
 
-    // ✅ Student Home
+    //  Student Home
     @GetMapping("/home")
     public String home(HttpSession session, Model model) {
         User loggedUser = (User) session.getAttribute("loggedUser");
@@ -41,7 +41,7 @@ public class StudentController {
         model.addAttribute("selectedCategory", null);
         model.addAttribute("menuItems", null);
 
-        // ✅ Read error message from session (important)
+        //  Read error message from session (important)
         model.addAttribute("errorMessage", session.getAttribute("errorMessage"));
         session.removeAttribute("errorMessage");
 
@@ -52,7 +52,7 @@ public class StudentController {
         return "index";
     }
 
-    // ✅ View Menu (college + category mandatory)
+    //  View Menu (college + category mandatory)
     @GetMapping("/menu")
     public String viewMenu(@RequestParam(value = "collegeId", required = false) Long collegeId,
                            @RequestParam(value = "category", required = false) String category,
@@ -76,7 +76,7 @@ public class StudentController {
         College college = collegeRepository.findById(collegeId)
                 .orElseThrow(() -> new RuntimeException("College not found"));
 
-        // ✅ IMPORTANT: filter by college + category
+        //  IMPORTANT: filter by college + category
         List<MenuItem> menuItems =
                 menuItemRepository.findByCollegeAndCategoryIgnoreCase(college, category);
 
@@ -86,7 +86,7 @@ public class StudentController {
         return "index";
     }
 
-    // ✅ Place Order (FIXED: totalAmount + empty selection)
+    //  Place Order (FIXED: totalAmount + empty selection)
     @PostMapping("/placeOrder")
     public String placeOrder(@RequestParam(name = "selectedItems", required = false) List<Long> selectedItems,
                              HttpSession session) {
@@ -104,7 +104,7 @@ public class StudentController {
 
         College college = firstItem.getCollege();
 
-        // ✅ Calculate total FIRST (critical fix)
+        //  Calculate total FIRST (critical fix)
         double totalAmount = 0.0;
         for (Long itemId : selectedItems) {
             MenuItem item = menuItemRepository.findById(itemId)
@@ -118,12 +118,12 @@ public class StudentController {
                 .status("Pending")
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .totalAmount(totalAmount)   // ✅ NEVER NULL now
+                .totalAmount(totalAmount)   
                 .build();
 
         orderRepository.save(order);
 
-        // ✅ Save order items + decrease stock
+        //  Save order items + decrease stock
         for (Long itemId : selectedItems) {
             MenuItem item = menuItemRepository.findById(itemId).orElseThrow();
 
@@ -145,7 +145,7 @@ public class StudentController {
         return "redirect:/student/orders";
     }
 
-    // ✅ My Orders
+    //  My Orders
     @GetMapping("/orders")
     public String myOrders(HttpSession session, Model model) {
         User loggedUser = (User) session.getAttribute("loggedUser");
