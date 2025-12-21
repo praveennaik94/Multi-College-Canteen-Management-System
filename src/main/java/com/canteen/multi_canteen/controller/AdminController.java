@@ -156,7 +156,7 @@ public class AdminController {
                 .orElseThrow(() -> new RuntimeException("College not found"));
 
         MenuItem menuItem = new MenuItem();
-        menuItem.setCollege(college);      // ✅ VERY IMPORTANT
+        menuItem.setCollege(college);     
         menuItem.setName(name);
         menuItem.setCategory(category);
         menuItem.setPrice(price);
