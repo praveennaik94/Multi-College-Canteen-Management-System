@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Student Dashboard - Canteen</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; }
+
+        header {
+            background: #007bff; color: #fff; padding: 15px 25px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-left h1 { margin: 0; font-size: 22px; color: white; }
+
+        .nav-right {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-link { color: white; text-decoration: none; font-weight: bold; }
+        .nav-link:hover { text-decoration: underline; }
+
+        /* 🚀 Mobile header */
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-wrap: wrap;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-right {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                margin-top: 10px;
+                gap: 10px;
+            }
+
+            .nav-right.show {
+                display: flex;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .nav-right {
+                display: flex !important;
+            }
+        }
+
+        main { padding: 20px; }
+        h2 { margin-bottom: 15px; }
+        section { margin-bottom: 25px; }
+        select, button { padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #007bff; color: #fff; }
+        .btn { padding: 8px 14px; background: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+        .btn:hover { background: #218838; }
+        .total-section { background: #fff; padding: 15px; margin-top: 20px; border: 1px solid #ddd; border-radius: 8px; width: fit-content; }
+        .status { padding: 6px 10px; border-radius: 6px; font-weight: bold; font-size: 14px; }
+        .status.pending { background: #ffc107; color: #000; }
+        .status.preparing { background: #17a2b8; color: #fff; }
+        .status.completed { background: #28a745; color: #fff; }
+        .status.cancelled { background: #dc3545; color: #fff; }
+        .error-message { color: red; font-weight: bold; margin-top: 15px; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="nav-left">
+        <h1>Student Dashboard</h1>
+    </div>
+
+    <!-- ☰ Mobile toggle button -->
+    <button class="menu-toggle" id="menuToggle">☰ Menu</button>
+
+    <div class="nav-right" id="navRight">
+        <a th:href="@{/student/home}" class="nav-link">Home</a>
+        <a th:href="@{/student/orders}" class="nav-link">My Orders</a>
+        <span th:text="'Welcome, ' + ${user.name}" class="nav-link"></span>
+        <a th:href="@{/logout}" class="nav-link">Logout</a>
+    </div>
+</header>
+
+<main>
+
+    <!-- ✅ Select College & Category -->
+    <section>
+        <h2>Select College & Category</h2>
+        <form th:action="@{/student/menu}" method="get">
+            <select name="collegeId" required>
+                <option value="">-- Select College --</option>
+                <option th:each="c : ${colleges}" th:value="${c.id}" th:text="${c.name}"
+                        th:selected="${selectedCollegeId} == ${c.id}"></option>
+            </select>
+
+            <select name="category" required>
+                <option value="">-- Select Category --</option>
+                <option value="Breakfast" th:selected="${selectedCategory} == 'Breakfast'">Breakfast</option>
+                <option value="Snacks" th:selected="${selectedCategory} == 'Snacks'">Snacks</option>
+                <option value="Chinese" th:selected="${selectedCategory} == 'Chinese'">Chinese</option>
+                <option value="Biryani" th:selected="${selectedCategory} == 'Biryani'">Biryani</option>
+                <option value="Drinks" th:selected="${selectedCategory} == 'Drinks'">Drinks</option>
+            </select>
+
+            <button type="submit">View Menu</button>
+        </form>
+
+        <!-- ❗ Show error if selections missing -->
+        <p th:if="${errorMessage}" th:text="${errorMessage}" class="error-message"></p>
+    </section>
+
+    <!-- ✅ Menu Section -->
+    <section th:if="${menuItems != null}">
+        <h2 th:text="${selectedCategory != null && selectedCategory != '' ? selectedCategory + ' Menu' : 'Menu'}">Menu</h2>
+
+        <div th:if="${#lists.isEmpty(menuItems)}" style="color:red; font-weight:bold; margin-top:15px;">
+            No items available in this category.
+        </div>
+
+        <form th:if="${!#lists.isEmpty(menuItems)}" id="orderForm" th:action="@{/student/placeOrder}" method="post">
+            <table>
+                <tr>
+                    <th>Select</th>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Available</th>
+                </tr>
+                <tr th:each="item : ${menuItems}">
+                    <td><input type="checkbox" name="selectedItems" th:value="${item.id}" class="item-checkbox"
+                               th:attr="data-price=${item.price}" th:disabled="${item.availableQuantity == 0}"></td>
+                    <td th:text="${item.name}"></td>
+                    <td th:text="${item.price}"></td>
+                    <td>
+                        <span th:if="${item.availableQuantity > 0}"
+                              th:text="'Available: ' + ${item.availableQuantity}"></span>
+                        <span th:if="${item.availableQuantity == 0}"
+                              style="color:red; font-weight:bold;">Not Available</span>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="total-section">
+                <p><strong>Selected Items:</strong> <span id="selectedCount">0</span></p>
+                <p><strong>Total Price:</strong> ₹<span id="totalPrice">0</span></p>
+                <button type="submit" class="btn">Place Order</button>
+            </div>
+        </form>
+    </section>
+
+    <!-- ✅ My Orders -->
+    <section th:if="${orders != null and !#lists.isEmpty(orders)}">
+        <h2>My Orders</h2>
+        <table>
+            <tr>
+                <th>College</th>
+                <th>Ordered At</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+            </tr>
+            <tr th:each="o : ${orders}">
+                <td th:text="${o.college.name}"></td>
+                <td th:text="${#temporals.format(o.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${orderItemsNames[o.id]}"></td>
+                <td th:text="'₹ ' + ${orderTotals[o.id]}"></td>
+                <td>
+                    <span th:class="'status ' + ${o.status != null ? o.status.toLowerCase() : 'pending'}"
+                          th:text="${o.status != null ? o.status : 'Pending'}"></span>
+                </td>
+            </tr>
+        </table>
+    </section>
+
+</main>
+
+<script>
+    // 🍔 Toggle mobile menu
+    const menuToggle = document.getElementById('menuToggle');
+    const navRight = document.getElementById('navRight');
+
+    if (menuToggle && navRight) {
+        menuToggle.addEventListener('click', () => {
+            navRight.classList.toggle('show');
+        });
+    }
+
+    // ✅ Live total price & validation
+    const checkboxes = document.querySelectorAll('.item-checkbox');
+    const totalPriceEl = document.getElementById('totalPrice');
+    const selectedCountEl = document.getElementById('selectedCount');
+    const orderForm = document.getElementById('orderForm');
+
+    function updateTotals() {
+        let total = 0, count = 0;
+        checkboxes.forEach(chk => {
+            if (chk.checked) {
+                total += parseFloat(chk.getAttribute('data-price'));
+                count++;
+            }
+        });
+        if (totalPriceEl) totalPriceEl.textContent = total.toFixed(2);
+        if (selectedCountEl) selectedCountEl.textContent = count;
+    }
+
+    checkboxes.forEach(chk => chk.addEventListener('change', updateTotals));
+
+    if (orderForm) {
+        orderForm.addEventListener('submit', function (e) {
+            const selected = Array.from(checkboxes).some(chk => chk.checked);
+            if (!selected) {
+                e.preventDefault();
+                alert("Please select at least one item before placing your order!");
+            }
+        });
+    }
+</script>
+<script>
+    function increaseQty(btn) {
+        const input = btn.previousElementSibling;
+        if (parseInt(input.value) < parseInt(input.max)) {
+            input.value++;
+        }
+    }
+    function decreaseQty(btn) {
+        const input = btn.nextElementSibling;
+        if (parseInt(input.value) > 0) {
+            input.value--;
+        }
+    }
+</script>
+
+</body>
+</html>

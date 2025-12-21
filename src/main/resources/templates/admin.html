@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard - Canteen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f8f9fa; }
+        header {
+            background: #343a40; color: #fff; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-left h1 { margin: 0; font-size: 22px; color: white; }
+        .nav-right { display: flex; gap: 25px; align-items: center; }
+        .nav-link { color: #fff; text-decoration: none; font-weight: bold; }
+        .nav-link:hover { text-decoration: underline; }
+        main { padding: 20px; }
+
+        .card {
+            background: #fff; padding: 20px; border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08); margin-bottom: 25px;
+        }
+        h2 { margin-top: 0; color: #343a40; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #007bff; color: white; }
+
+        input, select, button {
+            padding: 8px; border-radius: 5px; border: 1px solid #ccc;
+            margin-right: 5px;
+        }
+        button {
+            cursor: pointer; background: #007bff;
+            color: white; border: none;
+        }
+        button:hover { background: #0056b3; }
+
+        .delete-btn { background: #dc3545; }
+        .delete-btn:hover { background: #a71d2a; }
+
+        .status {
+            padding: 6px 10px; border-radius: 6px;
+            font-weight: bold; font-size: 14px;
+        }
+        .status.pending { background: #ffc107; color: #000; }
+        .status.preparing { background: #17a2b8; color: #fff; }
+        .status.completed { background: #28a745; color: #fff; }
+        .status.cancelled { background: #dc3545; color: #fff; }
+
+        .hamburger { display: none; flex-direction: column; cursor: pointer; }
+        .hamburger span { height: 3px; width: 25px; background: white; margin: 3px 0; }
+
+        @media (max-width: 768px) {
+            .nav-right {
+                display: none; flex-direction: column; gap: 15px;
+                background: #343a40; position: absolute;
+                top: 60px; right: 0; width: 100%;
+                text-align: center; padding: 15px 0;
+            }
+            .nav-right.active { display: flex; }
+            .hamburger { display: flex; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="nav-left"><h1>Admin Dashboard</h1></div>
+
+    <div class="hamburger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="nav-right" id="navbar">
+        <a th:href="@{/admin}" class="nav-link">Home</a>
+        <span th:text="'Welcome, ' + ${user.name}" class="nav-link"></span>
+        <a th:href="@{/logout}" class="nav-link">Logout</a>
+    </div>
+</header>
+
+<main>
+
+    <!-- College Management -->
+    <div class="card">
+        <h2>Manage Colleges</h2>
+        <form th:action="@{/admin/addCollege}" method="post">
+            <input type="text" name="name" placeholder="College Name" required>
+            <input type="text" name="location" placeholder="Location">
+            <button type="submit">Add College</button>
+        </form>
+
+        <table>
+            <tr><th>ID</th><th>Name</th><th>Location</th><th>Action</th></tr>
+            <tr th:each="c : ${colleges}">
+                <td th:text="${c.id}"></td>
+                <td th:text="${c.name}"></td>
+                <td th:text="${c.location}"></td>
+                <td>
+                    <form th:action="@{'/admin/deleteCollege/' + ${c.id}}" method="post">
+                        <button type="submit" class="delete-btn">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Menu Management -->
+    <div class="card">
+        <h2>Manage Menu</h2>
+        <form th:action="@{/admin/addMenu}" method="post">
+            <select name="collegeId" required>
+                <option value="">-- Select College --</option>
+                <option th:each="c : ${colleges}" th:value="${c.id}" th:text="${c.name}"></option>
+            </select>
+
+            <input type="text" name="name" placeholder="Item Name" required>
+            <select name="category" required>
+                <option value="">-- Category --</option>
+                <option>Breakfast</option>
+                <option>Snacks</option>
+                <option>Chinese</option>
+                <option>Biryani</option>
+                <option>Drinks</option>
+            </select>
+            <input type="number" step="0.01" name="price" placeholder="Price" required>
+            <input type="number" name="availableQuantity" placeholder="Available Qty" required min="1">
+            <button type="submit">Add Menu Item</button>
+        </form>
+
+        <table>
+            <tr><th>ID</th><th>College</th><th>Item</th><th>Category</th><th>Price</th><th>Available</th><th>Action</th></tr>
+            <tr th:each="m : ${menuItems}">
+                <td th:text="${m.id}"></td>
+                <td th:text="${m.college.name}"></td>
+                <td th:text="${m.name}"></td>
+                <td th:text="${m.category}"></td>
+                <td th:text="${m.price}"></td>
+                <td th:text="${m.availableQuantity}"></td>
+                <td>
+                    <form th:action="@{'/admin/deleteMenu/' + ${m.id}}" method="post">
+                        <button type="submit" class="delete-btn">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Orders -->
+    <div class="card">
+        <h2>Orders Overview</h2>
+        <table>
+            <tr>
+                <th>Order ID</th>
+                <th>College</th>
+                <th>Student</th>
+                <th>Items</th>
+                <th>Total (₹)</th>
+                <th>Status</th>
+                <th>Change Status</th>
+            </tr>
+            <tr th:each="o : ${orders}">
+                <td th:text="${o.id}"></td>
+                <td th:text="${o.college.name}"></td>
+                <td th:text="${o.student.name}"></td>
+                <td th:text="${orderItemsNames[o.id]}"></td>
+                <td th:text="${orderTotals[o.id]}"></td>
+                <td>
+                    <span th:class="'status ' + ${o.status != null ? o.status.toLowerCase() : 'pending'}"
+                          th:text="${o.status}"></span>
+                </td>
+                <td>
+                    <form th:action="@{/admin/updateStatus}" method="post">
+                        <input type="hidden" name="orderId" th:value="${o.id}">
+                        <select name="status">
+                            <option>Pending</option>
+                            <option>Preparing</option>
+                            <option>Completed</option>
+                            <option>Cancelled</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ✅ Sales Summary (FIXED) -->
+    <div class="card">
+        <h2>Sales Summary (All Canteens)</h2>
+        <p><strong>Total Orders:</strong> <span th:text="${orders.size()}"></span></p>
+        <p><strong>Total Revenue (₹):</strong>
+            <span th:text="${#numbers.formatDecimal(totalRevenueAllOrders, 1, 2)}"></span>
+        </p>
+    </div>
+
+</main>
+
+<script>
+    function toggleMenu() {
+        document.getElementById("navbar").classList.toggle("active");
+    }
+</script>
+
+</body>
+</html>
