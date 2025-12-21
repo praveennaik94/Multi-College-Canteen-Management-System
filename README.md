@@ -76,9 +76,6 @@ src/main/resources
   <li>Reports and analytics dashboard</li>
 </ul>
 
-<h2>🤝 Contributions</h2>
-<p>Contributions, issues, and feature requests are welcome. Feel free to open a pull request.</p>
-
 <h2>📧 Contact</h2>
 <p>
 <strong>Praveen Naik</strong><br>
