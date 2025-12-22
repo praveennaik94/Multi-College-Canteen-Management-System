@@ -46,15 +46,15 @@ public class AdminController {
 
         model.addAttribute("user", admin);
 
-        // 1️⃣ Colleges (always from DB)
+        // Colleges (always from DB)
         List<College> colleges = collegeRepository.findAll();
         model.addAttribute("colleges", colleges);
 
-        // 2️⃣ Menu Items
+        // Menu Items
         List<MenuItem> menuItems = menuItemRepository.findAll();
         model.addAttribute("menuItems", menuItems);
 
-        // 3️⃣ Orders + totals (SAFE calculation)
+        // Orders + totals (SAFE calculation)
         List<Order> orders = orderRepository.findAll();
         Map<Long, String> orderItemsNames = new HashMap<>();
         Map<Long, Double> orderTotals = new HashMap<>();
@@ -70,7 +70,7 @@ public class AdminController {
             for (OrderItem oi : items) {
                 if (oi.getMenuItem() != null) {
                     names.add(oi.getMenuItem().getName());
-                    total += oi.getPriceAtTime();   // ✅ FIX: use priceAtTime
+                    total += oi.getPriceAtTime(); 
                 }
             }
 
@@ -84,14 +84,14 @@ public class AdminController {
         model.addAttribute("orderTotals", orderTotals);
         model.addAttribute("totalRevenueAllOrders", totalRevenueAllOrders);
 
-        // 4️⃣ Students
+        // Students
         List<User> students = userRepository.findAll()
                 .stream()
                 .filter(u -> "STUDENT".equalsIgnoreCase(u.getRole()))
                 .toList();
         model.addAttribute("students", students);
 
-        // 5️⃣ Today Sales Reports
+        // Today Sales Reports
         List<Map<String, Object>> todayReports = new ArrayList<>();
         int grandTotalOrders = 0;
         double grandRevenue = 0.0;
@@ -118,12 +118,12 @@ public class AdminController {
         return "admin";
     }
 
-    // ✅ Add College (NO duplicate IDs, saved in DB correctly)
+    // Add College (NO duplicate IDs, saved in DB correctly)
     @PostMapping("/addCollege")
     public String addCollege(@RequestParam String name,
                              @RequestParam String location) {
 
-        // ✅ Prevent duplicate college names
+        // Prevent duplicate college names
         Optional<College> existing = collegeRepository.findByNameIgnoreCase(name);
         if (existing.isPresent()) {
             return "redirect:/admin";
@@ -137,14 +137,14 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    // ✅ Delete College (CASCADE SAFE)
+    // Delete College (CASCADE SAFE)
     @PostMapping("/deleteCollege/{id}")
     public String deleteCollege(@PathVariable Long id) {
         collegeRepository.deleteById(id);
         return "redirect:/admin";
     }
 
-    // ✅ Add Menu Item (FK ERROR FIXED)
+    //  Add Menu Item (FK ERROR FIXED)
     @PostMapping("/addMenu")
     public String addMenuItem(@RequestParam Long collegeId,
                               @RequestParam String name,
@@ -156,7 +156,7 @@ public class AdminController {
                 .orElseThrow(() -> new RuntimeException("College not found"));
 
         MenuItem menuItem = new MenuItem();
-        menuItem.setCollege(college);      // ✅ VERY IMPORTANT
+        menuItem.setCollege(college);     
         menuItem.setName(name);
         menuItem.setCategory(category);
         menuItem.setPrice(price);
@@ -166,14 +166,14 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    // ✅ Delete Menu Item
+    // Delete Menu Item
     @PostMapping("/deleteMenu/{id}")
     public String deleteMenuItem(@PathVariable Long id) {
         menuItemRepository.deleteById(id);
         return "redirect:/admin";
     }
 
-    // ✅ Update Order Status
+    // Update Order Status
     @PostMapping("/updateStatus")
     public String updateOrderStatus(@RequestParam Long orderId,
                                     @RequestParam String status) {

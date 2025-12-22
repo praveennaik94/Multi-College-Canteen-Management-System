@@ -54,10 +54,10 @@ public class AuthController {
             return "login";
         }
 
-        // ✅ Save logged-in user
+        // Save logged-in user
         session.setAttribute("loggedUser", user);
 
-        // ✅ Safe role handling
+        //  Safe role handling
         String role = user.getRole() == null ? "" : user.getRole().trim().toUpperCase();
 
         if ("ADMIN".equals(role)) {
@@ -87,7 +87,7 @@ public class AuthController {
             return "register";
         }
 
-        // ✅ Create college if not exists
+        // Create college if not exists
         collegeRepository.findByNameIgnoreCase(collegeName)
                 .orElseGet(() -> {
                     College c = new College();
@@ -103,7 +103,7 @@ public class AuthController {
                 .gender(gender)
                 .email(email)
                 .password(password)
-                .role("STUDENT")   // ✅ forced student role
+                .role("STUDENT")  
                 .build();
 
         userRepository.save(user);
